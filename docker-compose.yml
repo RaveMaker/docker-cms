@@ -1,0 +1,64 @@
+version: '3.7'
+
+services:
+  cms:
+    image: cms
+    build:
+      context: build-cms
+    privileged: true
+    command: cms
+    labels:
+      - "traefik.cms.frontend.rule=Host:${hostRule}"
+      - "traefik.cms.port=8888"
+      - "traefik.admin.frontend.rule=Host:${hostRuleAdmin}"
+      - "traefik.admin.port=8889"
+      - "traefik.docker.network=${podName}_frontend"
+    networks:
+      - frontend
+      - backend
+    volumes:
+      - ./config/cms.conf:/config/cms.conf
+      - ./config/isolate.conf:/usr/local/etc/isolate
+      - ./logs:/var/local/log/cms
+      - ./cms:/cms
+    restart: always
+    depends_on:
+      - cms_db
+    environment:
+      CMS_CONFIG: /config/cms.conf
+
+  rws:
+    image: cms:latest
+    command: rws
+    depends_on:
+      - cms
+    labels:
+      - "traefik.rank.frontend.rule=Host:${hostRuleRank}"
+      - "traefik.rank.port=8890"
+      - "traefik.docker.network=${podName}_frontend"
+    networks:
+      - frontend
+    volumes:
+      - ./config/cms.ranking.conf:/usr/local/etc/cms.ranking.conf
+      - ./logs:/var/local/log/cms
+      - ./ranking:/var/local/lib/cms/ranking
+      - ./cms:/cms
+    restart: always
+
+  cms_db:
+    image: postgres
+    restart: always
+    labels:
+      - "traefik.enable=false"
+    networks:
+      - backend
+    volumes:
+      - ./database:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${dbName}
+      POSTGRES_USER: ${dbUser}
+      POSTGRES_PASSWORD: ${dbPass}
+
+networks:
+  frontend:
+  backend:
