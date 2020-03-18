@@ -7,7 +7,7 @@ case "$1" in
 "cms")
   if [ ! -f /cms/requirements.txt ]; then
     # Copy cms to volume
-    cp -r /cms-dev/* /cms/
+    cp -rT /cms-dev /cms
   fi
   cd /cms || exit
   if [ ! -f /cms/.init-cms-db ]; then
