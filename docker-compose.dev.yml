@@ -7,12 +7,9 @@ services:
       context: build-cms
     privileged: true
     command: cms
-    labels:
-      - "traefik.cms.frontend.rule=Host:${hostRule}"
-      - "traefik.cms.port=8888"
-      - "traefik.admin.frontend.rule=Host:${hostRuleAdmin}"
-      - "traefik.admin.port=8889"
-      - "traefik.docker.network=${podName}_frontend"
+    ports:
+    - 8888:8888
+    - 8889:8889
     networks:
       - frontend
       - backend
@@ -26,16 +23,20 @@ services:
       - cms_db
     environment:
       CMS_CONFIG: /config/cms.conf
+    # Deploy block for docker swarm mode only - ignored by docker-compose
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
 
   rws:
     image: cms:latest
     command: rws
     depends_on:
       - cms
-    labels:
-      - "traefik.rank.frontend.rule=Host:${hostRuleRank}"
-      - "traefik.rank.port=8890"
-      - "traefik.docker.network=${podName}_frontend"
+    ports:
+    - 8890:8890
     networks:
       - frontend
     volumes:
@@ -44,12 +45,16 @@ services:
       - ./ranking:/var/local/lib/cms/ranking
       - ./cms:/cms
     restart: always
+    # Deploy block for docker swarm mode only - ignored by docker-compose
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
 
   cms_db:
     image: postgres
     restart: always
-    labels:
-      - "traefik.enable=false"
     networks:
       - backend
     volumes:
@@ -58,6 +63,12 @@ services:
       POSTGRES_DB: ${dbName}
       POSTGRES_USER: ${dbUser}
       POSTGRES_PASSWORD: ${dbPass}
+    # Deploy block for docker swarm mode only - ignored by docker-compose
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == worker]
 
 networks:
   frontend:

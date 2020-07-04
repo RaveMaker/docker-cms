@@ -4,8 +4,9 @@ Dockerfile for CMS (Contest Management System).
 docker-compose file includes:
  - CMS
  - RWS
- - Traefik support
  - Postgres
+ - Docker Swarm support
+ - Traefik v2 support
 
 ## Setup:
 1. clone the repo
@@ -14,6 +15,13 @@ docker-compose file includes:
 4. create `cms.ranking.conf` from `config/cms.ranking.conf.sample`
 5. create `isolate.conf` from `config/isolate.conf.sample`
 6. run `randomize-secret.sh` in `config` dir
+7. copy one of the docker-compose (dev/traefik) templates to `docker-compose.yml`
+
+- to create a docker-compose.prod.yml file for docker swarm run:
+
+```
+docker-compose config > docker-compose.prod.yml
+``` 
 
 ## Network settings:
 The stack is divided into two networks, backend and frontend.
