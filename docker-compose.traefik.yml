@@ -27,6 +27,7 @@ services:
       - traefik.http.services.${podName}.loadbalancer.server.port=8888
       - traefik.http.routers.${podName}-admin.rule=Host(`${hostRule}`) && (`${hostRuleAdmin}`)
       - traefik.http.middlewares.${podName}-admin.stripprefix.prefixes=${hostRuleAdmin}
+      - traefik.http.middlewares.${podName}-admin.stripprefix.forceslash=false
       - traefik.http.routers.${podName}-admin.entrypoints=websecure
       - traefik.http.services.${podName}-admin.loadbalancer.server.port=8889
       - traefik.docker.network=${podName}_frontend
@@ -54,6 +55,7 @@ services:
       - traefik.enable=true
       - traefik.http.routers.${podName}-rank.rule=Host(`${hostRule}`) && (`${hostRuleRank}`)
       - traefik.http.middlewares.${podName}-rank.stripprefix.prefixes=${hostRuleRank}
+      - traefik.http.middlewares.${podName}-rank.stripprefix.forceslash=false
       - traefik.http.routers.${podName}-rank.entrypoints=websecure
       - traefik.http.services.${podName}-rank.loadbalancer.server.port=8890
       - traefik.docker.network=${podName}_frontend
